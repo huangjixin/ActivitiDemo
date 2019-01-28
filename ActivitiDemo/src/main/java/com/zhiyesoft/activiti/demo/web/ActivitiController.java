@@ -1,15 +1,22 @@
 package com.zhiyesoft.activiti.demo.web;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.activiti.engine.HistoryService;
-import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.impl.persistence.entity.HistoricProcessInstanceEntityImpl;
 import org.activiti.engine.impl.persistence.entity.HistoricTaskInstanceEntityImpl;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.task.Task;
+import org.apache.rocketmq.client.exception.MQBrokerException;
+import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.remoting.common.RemotingHelper;
+import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,7 +42,7 @@ public class ActivitiController {
 
 	@Autowired
 	private HistoryService historyService;
-	
+
 	@ApiOperation(value = "流程部署", notes = "流程部署")
 	@GetMapping(value = "deploy")
 	@ResponseBody
@@ -77,8 +84,7 @@ public class ActivitiController {
 	@PostMapping(value = "executeTask")
 	@ResponseBody
 	public Response executeTask(@RequestParam String taskId, @RequestParam String replyContent,
-			@RequestParam String handlerUserId, 
-			@RequestParam boolean pass) {
+			@RequestParam String handlerUserId, @RequestParam boolean pass) {
 		Response response = new Response();
 		// 此处写死处理人ID
 //		String handlerUserId = "f841cd8f7a3f4fbc84783b0578c3304e";
@@ -100,31 +106,35 @@ public class ActivitiController {
 		response.setData(list);
 		return response;
 	}
-	
+
 	@ApiOperation(value = "历史流程实例", notes = "待审批任务节点")
 	@GetMapping(value = "hisProcessInstances")
 	@ResponseBody
 	public Response hisTasks(@RequestParam String userId, @RequestParam(defaultValue = "1") Integer pageNo,
 			@RequestParam(defaultValue = "10") Integer pageSize) {
 		Response response = new Response();
-		List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery().taskAssignee(userId).list();
-		
-		List<HistoricTaskInstanceEntityImpl>processInstanceEntityImpls = new ArrayList<HistoricTaskInstanceEntityImpl>();
+		List<HistoricTaskInstance> historicTaskInstances = historyService.createHistoricTaskInstanceQuery()
+				.taskAssignee(userId).list();
+
+		List<HistoricTaskInstanceEntityImpl> processInstanceEntityImpls = new ArrayList<HistoricTaskInstanceEntityImpl>();
 		for (HistoricTaskInstance historicTaskInstance : historicTaskInstances) {
 			HistoricProcessInstanceEntityImpl entityImpl = new HistoricProcessInstanceEntityImpl();
 			entityImpl.setName(historicTaskInstance.getName());
 		}
-		/*List<HistoricTaskInstance> list = historyService.createHistoricTaskInstanceQuery().taskAssignee(assignee).list();
-//		historyService.createNativeHistoricVariableInstanceQuery().;
-		List<HistoricTaskInstanceEntityImpl>results = new ArrayList<HistoricTaskInstanceEntityImpl>();
-		for (HistoricTaskInstance historicTaskInstance : list) {
-			
-			HistoricTaskInstanceEntityImpl entityImpl = new HistoricTaskInstanceEntityImpl();
-			entityImpl.setAssignee(historicTaskInstance.getAssignee());
-//			entityImpl.set;
-			results.add(entityImpl);
-		}*/
-		
+		/*
+		 * List<HistoricTaskInstance> list =
+		 * historyService.createHistoricTaskInstanceQuery().taskAssignee(assignee).list(
+		 * ); // historyService.createNativeHistoricVariableInstanceQuery().;
+		 * List<HistoricTaskInstanceEntityImpl>results = new
+		 * ArrayList<HistoricTaskInstanceEntityImpl>(); for (HistoricTaskInstance
+		 * historicTaskInstance : list) {
+		 * 
+		 * HistoricTaskInstanceEntityImpl entityImpl = new
+		 * HistoricTaskInstanceEntityImpl();
+		 * entityImpl.setAssignee(historicTaskInstance.getAssignee()); //
+		 * entityImpl.set; results.add(entityImpl); }
+		 */
+
 		response.setData(processInstanceEntityImpls);
 		return response;
 	}
@@ -138,4 +148,34 @@ public class ActivitiController {
 		response.setData(list);
 		return response;
 	}
+
+	
+	@Autowired
+	private DefaultMQProducer producer;
+	
+	@ApiOperation(value = "对RocketMQ发送消息", notes = "RocketMQ发送消息")
+	@GetMapping(value = "sendMessageToRocketMQServer")
+	@ResponseBody
+	public Response sendMessageToRocketMQServer() {
+		Response response = new Response();
+		
+		try {
+			Message msg = new Message("SELF_TEST_TOPIC","TagA",("我是新哥发的信息").getBytes(RemotingHelper.DEFAULT_CHARSET));
+			SendResult sendResult = producer.send(msg);
+//	        producer.shutdown();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (MQClientException e) {
+			e.printStackTrace();
+		} catch (RemotingException e) {
+			e.printStackTrace();
+		} catch (MQBrokerException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		return response;
+	}
+
 }
