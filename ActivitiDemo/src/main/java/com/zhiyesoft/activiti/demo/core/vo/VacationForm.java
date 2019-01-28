@@ -3,12 +3,17 @@ package com.zhiyesoft.activiti.demo.core.vo;
 import java.io.Serializable;
 import java.util.List;
 
+import lombok.Builder;
+import lombok.Data;
+
 /**
  * 请假表单
  * 
  * @author 黄记新
  *
  */
+@Builder
+//@Data
 public class VacationForm extends BaseForm implements Serializable {
 
 	/**

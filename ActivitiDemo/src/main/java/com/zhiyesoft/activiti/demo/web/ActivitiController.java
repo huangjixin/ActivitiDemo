@@ -56,6 +56,7 @@ public class ActivitiController {
 			@RequestParam(defaultValue = "leave") String Key, @ModelAttribute VacationForm vacationForm) {
 		Response response = new Response();
 //		VacationForm vacationForm = new VacationForm();
+//		vacationForm = VacationForm.builder().
 		vacationForm.setUserName("张志成");
 		vacationForm.setUserId(userId);
 		vacationForm.setStartDate("2019-01-25 00:00:00");
