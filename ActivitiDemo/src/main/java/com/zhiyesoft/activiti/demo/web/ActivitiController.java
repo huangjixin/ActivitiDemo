@@ -154,13 +154,13 @@ public class ActivitiController {
 	private DefaultMQProducer producer;
 	
 	@ApiOperation(value = "对RocketMQ发送消息", notes = "RocketMQ发送消息")
-	@GetMapping(value = "sendMessageToRocketMQServer")
+	@PostMapping(value = "sendMessageToRocketMQServer")
 	@ResponseBody
-	public Response sendMessageToRocketMQServer() {
+	public Response sendMessageToRocketMQServer(@RequestParam(defaultValue="我是新哥发的信息")String content) {
 		Response response = new Response();
 		
 		try {
-			Message msg = new Message("SELF_TEST_TOPIC","TagA",("我是新哥发的信息").getBytes(RemotingHelper.DEFAULT_CHARSET));
+			Message msg = new Message("SELF_TEST_TOPIC","TagA",content.getBytes(RemotingHelper.DEFAULT_CHARSET));
 			SendResult sendResult = producer.send(msg);
 //	        producer.shutdown();
 		} catch (UnsupportedEncodingException e) {
