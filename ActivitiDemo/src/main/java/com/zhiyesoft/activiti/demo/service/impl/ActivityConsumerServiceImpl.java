@@ -10,9 +10,9 @@ import org.activiti.engine.IdentityService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
-import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.IdentityLinkType;
 import org.activiti.engine.task.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +107,9 @@ public class ActivityConsumerServiceImpl implements ActivityConsumerService {
 		// 找到提交人的上级
 		task = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
 		if (task != null) {
-			taskService.setAssignee(task.getId(),"f841cd8f7a3f4fbc84783b0578c3304e");
+			runtimeService.addUserIdentityLink(pi.getId(), baseForm.getUserId(), IdentityLinkType.STARTER);
+			taskService.addUserIdentityLink(task.getId(), baseForm.getUserId(), IdentityLinkType.ASSIGNEE);
+//			taskService.setAssignee(task.getId(),"f841cd8f7a3f4fbc84783b0578c3304e");
 		}
 //		if(tasks != null && !tasks.isEmpty()) {
 //			Task task = tasks.get(0);
