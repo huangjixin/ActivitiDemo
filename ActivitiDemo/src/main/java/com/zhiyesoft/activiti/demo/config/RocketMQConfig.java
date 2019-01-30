@@ -33,14 +33,14 @@ public class RocketMQConfig {
 	@Bean
 	public DefaultMQProducer getDefaultMQProducer() {
 		DefaultMQProducer producer = new DefaultMQProducer("myproducer");
-		producer.setNamesrvAddr("192.168.9.220:9876;192.168.9.220:9877;");
+		producer.setNamesrvAddr("192.168.9.215:9876;192.168.9.215:9877");
 		return producer;
 	}
 	
 	@Bean
 	public DefaultMQPushConsumer getDefaultMQPushConsumer() {
 		DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("myconsumer");
-		consumer.setNamesrvAddr("192.168.9.220:9876;192.168.9.220:9877;");
+		consumer.setNamesrvAddr("192.168.9.215:9876;192.168.9.215:9877");
 		//这里设置的是一个consumer的消费策略
         //CONSUME_FROM_LAST_OFFSET 默认策略，从该队列最尾开始消费，即跳过历史消息
         //CONSUME_FROM_FIRST_OFFSET 从队列最开始开始消费，即历史消息（还储存在broker的）全部消费一遍
